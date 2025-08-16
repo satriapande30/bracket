@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Independence Day Tournament Bracket System</title>
+    <style>
+        /* CSS Variables for WCAG AA+ Compliance */
+        :root {
+            --primary-red: #DC2626;
+            --primary-white: #FFFFFF;
+            --secondary-red: #EF4444;
+            --dark-red: #991B1B;
+            --light-gray: #F3F4F6;
+            --dark-gray: #374151;
+            --text-dark: #1F2937;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --success: #059669;
+            --warning: #D97706;
+            --error: #DC2626;
+            --focus-ring: #2563EB;
+            --focus-ring-offset: 2px;
+            --transition-speed: 0.3s;
+            --border-radius: 12px;
+            --gradient-primary: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
+            --gradient-success: linear-gradient(135deg, var(--success), #10b981);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient-primary);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Focus Management */
+        *:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--primary-white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-primary);
+        }
+
+        .header h1 {
+            color: var(--primary-red);
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+            margin-bottom: 20px;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-speed) ease;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transition: width 0.6s, height 0.6s;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .btn:hover:not(:disabled)::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary-red);
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--primary-white);
+            color: var(--text-dark);
+            border-color: #ccc;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--light-gray);
+            border-color: #aaa;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+            border-color: var(--success);
+        }
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+        }
+
+        /* Enhanced file input styling */
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+            background: var(--gradient-success);
+            color: white;
+            border: 2px solid var(--success);
+            border-radius: 8px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+
+        .file-input-wrapper .file-icon {
+            margin-right: 8px;
+        }
+
+        .file-selected {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--light-gray);
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-dark);
+            display: none;
+            border-left: 4px solid var(--success);
+        }
+
+        .file-selected.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn var(--transition-speed) ease-in-out;
+        }
+        .view.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--primary-white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            color: var(--primary-red);
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .tournament-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .tournament-card {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            border: 3px solid transparent;
+            position: relative;
+            text-align: center;
+        }
+        .tournament-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .tournament-card.locked {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            cursor: pointer;
+        }
+        .tournament-card.locked::after {
+            content: '🏆';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+        }
+
+        .tournament-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .bracket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .progress-container {
+            min-width: 250px;
+            text-align: right;
+        }
+
+        .progress-bar {
+            background: var(--light-gray);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .progress-fill {
+            background: var(--gradient-primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+
+        .team-input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .team-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color var(--transition-speed);
+        }
+        .team-input:focus {
+            border-color: var(--primary-red);
+        }
+        .team-input.error {
+            border-color: var(--error);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .session {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--primary-red);
+        }
+
+        .current-session {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.1));
+            border: 2px solid var(--primary-red);
+            border-left: 5px solid var(--primary-red);
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .team-card {
+            background: var(--primary-white);
+            border: 3px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+        .team-card:hover:not(.disabled) {
+            border-color: var(--primary-red);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        .team-card.winner {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--dark-red);
+        }
+        .team-card.winner-first {
+            background: linear-gradient(135deg, var(--gold), #d4af37);
+            color: var(--text-dark);
+            border-color: #b8860b;
+            box-shadow: 0 8px 20px rgba(255,215,0,0.4);
+        }
+
+        .team-card.winner-second {
+            background: linear-gradient(135deg, var(--silver), #aaa);
+            color: var(--text-dark);
+            border-color: #999;
+            box-shadow: 0 8px 20px rgba(192,192,192,0.4);
+        }
+
+        .team-card.winner-third {
+            background: linear-gradient(135deg, var(--bronze), #a0522d);
+            color: white;
+            border-color: #8B4513;
+            box-shadow: 0 8px 20px rgba(205,127,50,0.4);
+        }
+
+        .selection-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--success);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .team-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .final-stage {
+            background: linear-gradient(135deg, var(--dark-red), #1F2937);
+            color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-top: 25px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .final-instructions {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255,255,255,0.15);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #FFF;
+            font-weight: 500;
+        }
+
+        .final-stage .team-card {
+            background: rgba(255,255,255,0.95);
+            color: var(--text-dark);
+            border: 3px solid rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+
+        .final-stage .team-card:hover:not(.disabled) {
+            background: #FFFFFF;
+            color: var(--text-dark);
+            border-color: var(--gold);
+            box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+        }
+
+        .final-stage .team-card.disabled {
+            background: rgba(200,200,200,0.7);
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .final-stage .btn-primary {
+            background: var(--gold);
+            color: var(--text-dark);
+            border-color: var(--gold);
+            font-weight: 700;
+        }
+
+        .final-stage .btn-primary:hover:not(:disabled) {
+            background: #FFD700;
+            color: var(--text-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255,215,0,0.4);
+        }
+
+        .final-stage .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .final-stage .btn-secondary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border-color: rgba(255,255,255,0.8);
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .podium-place {
+            background: rgba(255,255,255,0.1);
+            border: 3px dashed rgba(255,255,255,0.3);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            width: 200px;
+            min-height: 140px;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .podium-place.first { order: 2; min-height: 180px; }
+        .podium-place.second { order: 1; }
+        .podium-place.third { order: 3; }
+        .podium-place.filled {
+            background: var(--primary-white);
+            color: var(--text-dark);
+            border-style: solid;
+            border-color: #ddd;
+        }
+        .podium-place.filled.first { 
+            background: linear-gradient(135deg, var(--gold), #d4af37); 
+            color: var(--text-dark);
+            border-color: #b8860b;
+        }
+        .podium-place.filled.second { 
+            background: linear-gradient(135deg, var(--silver), #aaa); 
+            color: var(--text-dark);
+            border-color: #999;
+        }
+        .podium-place.filled.third { 
+            background: linear-gradient(135deg, var(--bronze), #a0522d); 
+            color: white;
+            border-color: #8B4513;
+        }
+
+        .podium-medal {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--primary-white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .modal-header {
+            color: var(--primary-red);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px; right: 30px;
+            background: var(--dark-gray);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all var(--transition-speed) ease;
+            max-width: 400px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--error); }
+        .toast.warning { background: var(--warning); }
+
+        .confetti {
+            position: fixed;
+            width: 10px; height: 10px;
+            z-index: 999;
+            pointer-events: none;
+            animation: confetti-fall 3s linear forwards;
+        }
+        @keyframes confetti-fall {
+            to { 
+                transform: translateY(100vh) rotate(720deg); 
+                opacity: 0; 
+            }
+        }
+
+        .celebration-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 998;
+        }
+
+        /* Enhanced Leaderboard Styles */
+        .leaderboard-card {
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-red);
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(243,244,246,0.95));
+            backdrop-filter: blur(10px);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .leaderboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .leaderboard-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 20px;
+            margin: -30px -30px 25px -30px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .leaderboard-entry {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .leaderboard-entry:hover {
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .leaderboard-entry:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-date {
+            font-weight: 600;
+            color: var(--primary-red);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leaderboard-date .date-badge {
+            background: var(--primary-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .leaderboard-winners {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-winner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .leaderboard-winner:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .leaderboard-winner.first {
+            background: linear-gradient(135deg, var(--gold), #d4af37);
+            color: var(--text-dark);
+        }
+
+        .leaderboard-winner.second {
+            background: linear-gradient(135deg, var(--silver), #aaa);
+            color: var(--text-dark);
+        }
+
+        .leaderboard-winner.third {
+            background: linear-gradient(135deg, var(--bronze), #a0522d);
+            color: white;
+        }
+
+        .import-instructions {
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--success);
+        }
+
+        .import-instructions h4 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+
+        .import-instructions ul {
+            margin-left: 20px;
+        }
+
+        .import-instructions li {
+            margin-bottom: 5px;
+        }
+
+        .completion-actions {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: var(--border-radius);
+        }
+
+        /* Auto-save indicator */
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Filter and Sort Controls */
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            transition: border-color var(--transition-speed);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-red);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.05));
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-top: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .bracket-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .progress-container {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .podium {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .podium-place {
+                width: 100%;
+                max-width: 250px;
+                min-height: 120px;
+            }
+            
+            .podium-place.first {
+                order: 1;
+            }
+
+            .leaderboard-winners {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="celebration-overlay" id="celebrationOverlay"></div>
+    <div class="save-indicator" id="saveIndicator">✅ Saved</div>
+
+    <div class="container">
+        <header class="header">
+            <h1>🏆 Independence Day Tournament</h1>
+            <p>Professional Multi-Tournament Bracket System</p>
+            <div class="header-controls" id="mainControls">
+                <!-- Controls are rendered by JS -->
+            </div>
+        </header>
+
+        <main id="mainContent">
+            <!-- Views are rendered by JS -->
+        </main>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Tournament Configuration
+        const tournamentConfigs = {
+            marble: { name: "Marble Tournament", emoji: "🔮", totalTeams: 15, sessions: 3, teamsPerSession: 5, winnersPerSession: 2 },
+            octopus: { name: "Octopus Contest", emoji: "🐙", totalTeams: 15, sessions: 3, teamsPerSession: 5, winnersPerSession: 2 },
+            bottle: { name: "Bottle Tournament", emoji: "🍼", totalTeams: 8, sessions: 2, teamsPerSession: 4, winnersPerSession: 2 },
+            cracker: { name: "Cracker Tournament", emoji: "🎆", totalTeams: 24, sessions: 2, teamsPerSession: 12, winnersPerSession: 4 }
+        };
+
+        // Letter-based team names for dummy data generation
+        const letterTeamNames = [
+            'Team A', 'Team B', 'Team C', 'Team D', 'Team E', 'Team F', 'Team G', 'Team H',
+            'Team I', 'Team J', 'Team K', 'Team L', 'Team M', 'Team N', 'Team O', 'Team P',
+            'Team Q', 'Team R', 'Team S', 'Team T', 'Team U', 'Team V', 'Team W', 'Team X',
+            'Team Y', 'Team Z'
+        ];
+
+        const App = {
+            // State Management
+            state: {},
+            
+            defaultState() {
+                return {
+                    version: 7, // Updated version for new features
+                    currentView: 'selector',
+                    currentTournament: null,
+                    tournaments: {
+                        marble: this.createEmptyTournament(),
+                        octopus: this.createEmptyTournament(),
+                        bottle: this.createEmptyTournament(),
+                        cracker: this.createEmptyTournament()
+                    },
+                    leaderboard: [],
+                    leaderboardFilter: 'all',
+                    leaderboardSort: 'date-desc'
+                };
+            },
+
+            createEmptyTournament() {
+                return {
+                    locked: false,
+                    stage: 'setup',
+                    teams: [],
+                    sessions: [],
+                    finalists: [],
+                    winners: { first: null, second: null, third: null }
+                };
+            },
+
+            // Initialize Application
+            init() {
+                this.loadState();
+                this.render();
+                this.attachEventListeners();
+            },
+
+            loadState() {
+                try {
+                    const savedState = JSON.parse(localStorage.getItem('tournamentState_v7') || 'null');
+                    this.state = savedState || this.defaultState();
+                    if (!savedState || this.state.version < 7) {
+                        this.state = this.defaultState();
+                        this.showToast("System updated to latest version with enhanced features!", "success");
+                    }
+                } catch (e) {
+                    console.error("Failed to load state:", e);
+                    this.state = this.defaultState();
+                }
+            },
+
+            saveState() {
+                try {
+                    localStorage.setItem('tournamentState_v7', JSON.stringify(this.state));
+                    this.showSaveIndicator();
+                } catch (e) {
+                    console.error("Failed to save state:", e);
+                    this.showToast("Failed to save data. Please try again.", "error");
+                }
+            },
+
+            showSaveIndicator() {
+                const indicator = document.getElementById('saveIndicator');
+                indicator.classList.add('show');
+                setTimeout(() => indicator.classList.remove('show'), 1500);
+            },
+
+            updateState(newState) {
+                Object.assign(this.state, newState);
+                this.render();
+                this.saveState();
+            },
+
+            // Event Handlers
+            attachEventListeners() {
+                const mainContent = document.getElementById('mainContent');
+                const mainControls = document.getElementById('mainControls');
+                
+                mainContent.addEventListener('click', this.handleMainClick.bind(this));
+                mainContent.addEventListener('change', this.handleMainChange.bind(this));
+                mainControls.addEventListener('click', this.handleControlsClick.bind(this));
+                
+                document.getElementById('modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal' || e.target.classList.contains('close-modal-btn')) {
+                        this.closeModal();
+                    }
+                });
+
+                // ESC key to close modal
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeModal();
+                });
+            },
+
+            handleControlsClick(e) {
+                const action = e.target.dataset.action;
+                if (!action) return;
+
+                switch(action) {
+                    case 'showSelector': 
+                        this.updateState({ currentView: 'selector', currentTournament: null }); 
+                        break;
+                    case 'showLeaderboard': 
+                        this.updateState({ currentView: 'leaderboard' }); 
+                        break;
+                    case 'importData': 
+                        this.showImportModal(); 
+                        break;
+                    case 'exportData': 
+                        this.exportData(); 
+                        break;
+                    case 'resetAll': 
+                        this.showResetConfirmation(); 
+                        break;
+                }
+            },
+
+            handleMainClick(e) {
+                const target = e.target.closest('[data-action]');
+                if (!target || target.closest('.disabled')) return;
+
+                const { action, type, id } = target.dataset;
+
+                switch(action) {
+                    case 'selectTournament': 
+                        this.selectTournament(type); 
+                        break;
+                    case 'generateDummy': 
+                        this.generateDummyTeams(); 
+                        break;
+                    case 'startBracket': 
+                        this.startBracket(); 
+                        break;
+                    case 'selectWinner': 
+                        this.selectWinner(parseInt(id)); 
+                        break;
+                    case 'completeSession': 
+                        this.completeSession(); 
+                        break;
+                    case 'selectFinalWinner': 
+                        this.selectFinalWinner(parseInt(id)); 
+                        break;
+                    case 'undoFinal': 
+                        this.undoLastFinalSelection(); 
+                        break;
+                    case 'finalize': 
+                        this.showFinalizationConfirmation(); 
+                        break;
+                    case 'returnToMenu':
+                        this.updateState({ currentView: 'selector', currentTournament: null }); 
+                        break;
+                }
+            },
+
+            handleMainChange(e) {
+                if (e.target.id === 'leaderboardFilter') {
+                    this.updateState({ leaderboardFilter: e.target.value });
+                } else if (e.target.id === 'leaderboardSort') {
+                    this.updateState({ leaderboardSort: e.target.value });
+                }
+            },
+
+            // Tournament Actions
+            selectTournament(type) {
+                if (this.state.tournaments[type].locked) {
+                    this.showCompletedResults(type);
+                } else {
+                    this.updateState({ currentView: 'bracket', currentTournament: type });
+                }
+            },
+
+            generateDummyTeams() {
+                document.querySelectorAll('.team-input').forEach((input, i) => {
+                    // Use letter-based team names (Team A, Team B, etc.)
+                    input.value = letterTeamNames[i] || `Team ${String.fromCharCode(65 + i)}`;
+                });
+                this.showToast("Letter-based team names generated successfully!", "success");
+            },
+
+            startBracket() {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                const inputs = [...document.querySelectorAll('.team-input')];
+                const teams = [];
+                const teamNames = new Set();
+                let isValid = true;
+                const errors = [];
+
+                inputs.forEach((input, i) => {
+                    const name = input.value.trim();
+                    input.classList.remove('error');
+                    
+                    if (!name) {
+                        isValid = false;
+                        input.classList.add('error');
+                        errors.push(`Team ${i + 1}: Name is required`);
+                    } else if (name.length > 30) {
+                        isValid = false;
+                        input.classList.add('error');
+                        errors.push(`Team ${i + 1}: Name too long (max 30 characters)`);
+                    } else if (teamNames.has(name.toLowerCase())) {
+                        isValid = false;
+                        input.classList.add('error');
+                        errors.push(`Team ${i + 1}: Duplicate name "${name}"`);
+                    } else {
+                        teamNames.add(name.toLowerCase());
+                        teams.push({ id: i + 1, name, sessionWins: [] });
+                    }
+                });
+
+                if (!isValid || teams.length !== config.totalTeams) {
+                    this.showErrorModal("Team Validation Errors", errors);
+                    return;
+                }
+
+                tournament.teams = teams;
+                tournament.stage = 'sessions';
+                
+                // Create sessions
+                tournament.sessions = [];
+                for (let i = 0; i < config.sessions; i++) {
+                    const sessionTeams = teams.slice(i * config.teamsPerSession, (i + 1) * config.teamsPerSession);
+                    tournament.sessions.push({ 
+                        id: i + 1, 
+                        teams: sessionTeams, 
+                        winners: [], 
+                        completed: false 
+                    });
+                }
+                
+                this.updateState({ tournaments: this.state.tournaments });
+                this.showToast("Tournament bracket created successfully!", "success");
+            },
+
+            selectWinner(teamId) {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                const currentSession = tournament.sessions.find(s => !s.completed);
+                if (!currentSession) return;
+
+                const winnerIndex = currentSession.winners.indexOf(teamId);
+                if (winnerIndex > -1) {
+                    currentSession.winners.splice(winnerIndex, 1);
+                } else if (currentSession.winners.length < config.winnersPerSession) {
+                    currentSession.winners.push(teamId);
+                } else {
+                    this.showToast(`Maximum ${config.winnersPerSession} winners allowed for this session.`, "warning");
+                    return;
+                }
+                
+                this.updateState({ tournaments: this.state.tournaments });
+            },
+
+            completeSession() {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                const currentSession = tournament.sessions.find(s => !s.completed);
+                
+                if (currentSession.winners.length !== config.winnersPerSession) {
+                    this.showToast(`Please select exactly ${config.winnersPerSession} winners before completing the session.`, "warning");
+                    return;
+                }
+
+                currentSession.completed = true;
+                
+                currentSession.winners.forEach(winnerId => {
+                    const team = tournament.teams.find(t => t.id === winnerId);
+                    if (team) tournament.finalists.push({ ...team });
+                });
+
+                if (tournament.sessions.every(s => s.completed)) {
+                    tournament.stage = 'final';
+                    this.showToast("All sessions completed! Grand Final is ready.", "success");
+                } else {
+                    this.showToast(`Session ${currentSession.id} completed successfully!`, "success");
+                }
+                
+                this.updateState({ tournaments: this.state.tournaments });
+            },
+
+            // Final selection now starts from 3rd place to 1st place (reverse order)
+            selectFinalWinner(teamId) {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                if (Object.values(tournament.winners).some(w => w?.id === teamId)) {
+                    this.showToast("This team is already selected for a position.", "warning");
+                    return;
+                }
+                
+                const team = tournament.finalists.find(f => f.id === teamId);
+                if (!team) return;
+
+                let positionToFill;
+                let positionName;
+                let confettiColors;
+                
+                // Selection order: 3rd -> 2nd -> 1st (reverse order)
+                if (!tournament.winners.third) {
+                    positionToFill = 'third';
+                    positionName = 'Third Place';
+                    confettiColors = ['#CD7F32', '#A0522D'];
+                } else if (!tournament.winners.second) {
+                    positionToFill = 'second';
+                    positionName = 'Runner-up (2nd Place)';
+                    confettiColors = ['#C0C0C0', '#A9A9A9'];
+                } else if (!tournament.winners.first) {
+                    positionToFill = 'first';
+                    positionName = 'Champion (1st Place)';
+                    confettiColors = ['#FFD700', '#FFA500'];
+                } else {
+                    this.showToast("All positions have been filled!", "info");
+                    return;
+                }
+
+                if (positionToFill && team) {
+                    tournament.winners[positionToFill] = { ...team };
+                    this.createConfetti(40, confettiColors);
+                    this.showToast(`🎉 ${team.name} selected as ${positionName}!`, "success");
+                    
+                    // Auto-scroll to podium after selection
+                    setTimeout(() => {
+                        const podium = document.querySelector('.podium');
+                        if (podium) {
+                            podium.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 500);
+                }
+                
+                this.updateState({ tournaments: this.state.tournaments });
+            },
+
+            // Undo order now follows new selection order (1st -> 2nd -> 3rd)
+            undoLastFinalSelection() {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                let undonePosition = null;
+                let undoneTeam = null;
+                
+                // Undo in reverse order of new selection: 1st -> 2nd -> 3rd
+                if (tournament.winners.first) {
+                    undoneTeam = tournament.winners.first.name;
+                    undonePosition = "Champion";
+                    tournament.winners.first = null;
+                } else if (tournament.winners.second) {
+                    undoneTeam = tournament.winners.second.name;
+                    undonePosition = "Runner-up";
+                    tournament.winners.second = null;
+                } else if (tournament.winners.third) {
+                    undoneTeam = tournament.winners.third.name;
+                    undonePosition = "Third Place";
+                    tournament.winners.third = null;
+                } else {
+                    this.showToast("No selections to undo.", "info");
+                    return;
+                }
+                
+                if (undoneTeam && undonePosition) {
+                    this.showToast(`${undonePosition} selection (${undoneTeam}) has been undone.`, "info");
+                }
+                
+                this.updateState({ tournaments: this.state.tournaments });
+            },
+
+            showFinalizationConfirmation() {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                
+                if (!tournament.winners.first || !tournament.winners.second || !tournament.winners.third) {
+                    this.showToast("Please select all three positions before finalizing the tournament.", "warning");
+                    return;
+                }
+
+                this.showConfirmModal(
+                    "Finalize Tournament",
+                    `Are you sure you want to finalize the ${config.name}? This action cannot be undone.
+                    <br><br>
+                    <strong>🥇 Champion:</strong> ${tournament.winners.first.name}<br>
+                    <strong>🥈 Runner-up:</strong> ${tournament.winners.second.name}<br>
+                    <strong>🥉 Third Place:</strong> ${tournament.winners.third.name}`,
+                    () => this.finalizeTournament()
+                );
+            },
+
+            finalizeTournament() {
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                tournament.locked = true;
+                tournament.stage = 'finished';
+                
+                this.state.leaderboard.push({
+                    id: Date.now(),
+                    tournament: this.state.currentTournament,
+                    tournamentName: config.name,
+                    date: new Date().toISOString(),
+                    champion: tournament.winners.first,
+                    runnerUp: tournament.winners.second,
+                    third: tournament.winners.third,
+                    totalParticipants: tournament.teams.length
+                });
+
+                this.createConfetti(150);
+                this.showToast(`🎊 Congratulations to ${tournament.winners.first.name}! Tournament finalized.`, "success");
+                this.updateState({ 
+                    tournaments: this.state.tournaments, 
+                    leaderboard: this.state.leaderboard 
+                });
+            },
+
+            // Enhanced Data Import/Export
+            showImportModal() {
+                const content = `
+                    <div class="modal-header">📥 Import Tournament Data</div>
+                    <div class="import-instructions">
+                        <h4>Excel File Format Requirements:</h4>
+                        <ul>
+                            <li><strong>Sheet Name:</strong> "Teams" (case sensitive)</li>
+                            <li><strong>Column A:</strong> Team ID (1, 2, 3...)</li>
+                            <li><strong>Column B:</strong> Team Name (max 30 characters)</li>
+                            <li><strong>Column C:</strong> Tournament Type (marble, octopus, bottle, cracker)</li>
+                            <li><strong>No header row</strong> - start data from row 1</li>
+                        </ul>
+                        <p><strong>Note:</strong> This will replace all current tournament data.</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="file-input-wrapper">
+                            <span class="file-icon">📁</span>
+                            <span>Choose Excel File</span>
+                            <input type="file" id="importFile" accept=".xlsx,.xls" onchange="App.handleFileSelection(this)">
+                        </div>
+                        <div class="file-selected" id="fileSelected"></div>
+                        <br>
+                        <button class="btn btn-success" onclick="App.processImport()">📥 Import Data</button>
+                        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+                    </div>
+                `;
+                this.openModal(content);
+            },
+
+            handleFileSelection(input) {
+                const fileDisplay = document.getElementById('fileSelected');
+                if (input.files && input.files.length > 0) {
+                    const fileName = input.files[0].name;
+                    const fileSize = (input.files[0].size / 1024).toFixed(2);
+                    fileDisplay.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span>📄</span>
+                            <div>
+                                <div><strong>${fileName}</strong></div>
+                                <small>${fileSize} KB</small>
+                            </div>
+                        </div>
+                    `;
+                    fileDisplay.classList.add('show');
+                } else {
+                    fileDisplay.classList.remove('show');
+                }
+            },
+
+            processImport() {
+                const fileInput = document.getElementById('importFile');
+                const file = fileInput?.files[0];
+                
+                if (!file) {
+                    this.showToast("Please select an Excel file to import.", "warning");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        if (!workbook.SheetNames.includes('Teams')) {
+                            throw new Error('Sheet "Teams" not found. Please check the file format.');
+                        }
+                        
+                        const worksheet = workbook.Sheets['Teams'];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: ['id', 'name', 'tournament'] });
+                        
+                        this.processImportedData(jsonData);
+                        
+                    } catch (error) {
+                        console.error('Import error:', error);
+                        this.showToast(`Import failed: ${error.message}`, "error");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            },
+
+            processImportedData(data) {
+                if (!Array.isArray(data) || data.length === 0) {
+                    this.showToast("No valid data found in the Excel file.", "error");
+                    return;
+                }
+
+                const newState = this.defaultState();
+                const errors = [];
+
+                data.forEach((row, index) => {
+                    const { id, name, tournament } = row;
+                    
+                    if (!id || !name || !tournament) {
+                        errors.push(`Row ${index + 1}: Missing required data`);
+                        return;
+                    }
+                    
+                    if (!tournamentConfigs[tournament]) {
+                        errors.push(`Row ${index + 1}: Invalid tournament type "${tournament}"`);
+                        return;
+                    }
+                    
+                    if (typeof name !== 'string' || name.length > 30) {
+                        errors.push(`Row ${index + 1}: Invalid team name`);
+                        return;
+                    }
+                    
+                    newState.tournaments[tournament].teams.push({
+                        id: parseInt(id),
+                        name: name.toString().trim(),
+                        sessionWins: []
+                    });
+                });
+
+                if (errors.length > 0) {
+                    this.showErrorModal("Import Validation Errors", errors);
+                    return;
+                }
+
+                this.state = newState;
+                this.updateState({});
+                this.closeModal();
+                this.showToast("Data imported successfully! 🎉", "success");
+            },
+
+            // Enhanced Export with comprehensive data
+            exportData() {
+                const exportData = [];
+                
+                // Export team data
+                Object.entries(this.state.tournaments).forEach(([tournamentType, tournament]) => {
+                    const config = tournamentConfigs[tournamentType];
+                    tournament.teams.forEach(team => {
+                        const winners = tournament.locked ? {
+                            champion: tournament.winners.first?.name || '',
+                            runnerUp: tournament.winners.second?.name || '',
+                            third: tournament.winners.third?.name || ''
+                        } : { champion: '', runnerUp: '', third: '' };
+                        
+                        exportData.push({
+                            'Team ID': team.id,
+                            'Team Name': team.name,
+                            'Tournament Type': tournamentType,
+                            'Tournament Name': config.name,
+                            'Status': tournament.locked ? 'Completed' : tournament.stage,
+                            'Champion': winners.champion,
+                            'Runner-up': winners.runnerUp,
+                            'Third Place': winners.third,
+                            'Export Date': new Date().toLocaleDateString()
+                        });
+                    });
+                });
+
+                if (exportData.length === 0) {
+                    this.showToast("No team data to export.", "warning");
+                    return;
+                }
+
+                try {
+                    const worksheet = XLSX.utils.json_to_sheet(exportData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Tournament_Data");
+                    
+                    // Add leaderboard sheet if there are completed tournaments
+                    if (this.state.leaderboard.length > 0) {
+                        const leaderboardData = this.state.leaderboard.map(entry => ({
+                            'Tournament': entry.tournamentName,
+                            'Date': new Date(entry.date).toLocaleDateString(),
+                            'Champion': entry.champion.name,
+                            'Runner-up': entry.runnerUp.name,
+                            'Third Place': entry.third.name,
+                            'Total Participants': entry.totalParticipants
+                        }));
+                        
+                        const leaderboardSheet = XLSX.utils.json_to_sheet(leaderboardData);
+                        XLSX.utils.book_append_sheet(workbook, leaderboardSheet, "Leaderboard");
+                    }
+                    
+                    const fileName = `tournament_comprehensive_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    XLSX.writeFile(workbook, fileName);
+                    
+                    this.showToast("📊 Comprehensive data exported successfully!", "success");
+                } catch (error) {
+                    console.error('Export error:', error);
+                    this.showToast("Export failed. Please try again.", "error");
+                }
+            },
+
+            showResetConfirmation() {
+                this.showConfirmModal(
+                    "Reset All Data",
+                    "This will permanently delete ALL tournament data, including teams, results, and leaderboard. This action cannot be undone.<br><br>Type <strong>RESET</strong> below to confirm:",
+                    () => {
+                        const input = document.getElementById('confirmationInput');
+                        if (input && input.value === 'RESET') {
+                            this.resetAll();
+                        } else {
+                            this.showToast("Reset cancelled - confirmation text didn't match.", "info");
+                        }
+                    },
+                    true
+                );
+            },
+
+            resetAll() {
+                this.state = this.defaultState();
+                this.updateState({});
+                this.closeModal();
+                this.showToast("🔄 All data has been reset successfully.", "success");
+            },
+
+            // Calculate tournament statistics
+            calculateStats() {
+                const stats = {
+                    totalTournaments: Object.keys(this.state.tournaments).length,
+                    completedTournaments: this.state.leaderboard.length,
+                    totalParticipants: 0,
+                    activeTeams: 0,
+                    mostWins: null
+                };
+
+                // Calculate total participants and active teams
+                Object.values(this.state.tournaments).forEach(tournament => {
+                    stats.totalParticipants += tournament.teams.length;
+                    if (!tournament.locked && tournament.teams.length > 0) {
+                        stats.activeTeams += tournament.teams.length;
+                    }
+                });
+
+                // Find team with most wins
+                const winCounts = {};
+                this.state.leaderboard.forEach(entry => {
+                    const champion = entry.champion.name;
+                    winCounts[champion] = (winCounts[champion] || 0) + 1;
+                });
+
+                if (Object.keys(winCounts).length > 0) {
+                    const maxWins = Math.max(...Object.values(winCounts));
+                    stats.mostWins = {
+                        name: Object.keys(winCounts).find(name => winCounts[name] === maxWins),
+                        wins: maxWins
+                    };
+                }
+
+                return stats;
+            },
+
+            // Render Functions
+            render() {
+                this.renderControls();
+                this.renderMainContent();
+            },
+
+            renderControls() {
+                document.getElementById('mainControls').innerHTML = `
+                    <button class="btn btn-primary" data-action="showSelector">🏠 Main Menu</button>
+                    <button class="btn btn-secondary" data-action="showLeaderboard">🏆 Leaderboard</button>
+                    <button class="btn btn-success" data-action="importData">📥 Import Excel</button>
+                    <button class="btn btn-secondary" data-action="exportData">📤 Export Excel</button>
+                    <button class="btn btn-secondary" data-action="resetAll">🔄 Reset All</button>
+                `;
+            },
+
+            renderMainContent() {
+                const main = document.getElementById('mainContent');
+                main.innerHTML = `
+                    <div class="view ${this.state.currentView === 'selector' ? 'active' : ''}">${this.renderSelectorView()}</div>
+                    <div class="view ${this.state.currentView === 'bracket' ? 'active' : ''}">${this.renderBracketView()}</div>
+                    <div class="view ${this.state.currentView === 'leaderboard' ? 'active' : ''}">${this.renderLeaderboardView()}</div>
+                `;
+            },
+
+            renderSelectorView() {
+                return `
+                    <div class="card">
+                        <h2 class="card-header">Select Tournament Type</h2>
+                        <div class="tournament-grid">
+                            ${Object.entries(tournamentConfigs).map(([type, config]) => {
+                                const tournament = this.state.tournaments[type];
+                                const teamCount = tournament.teams.length;
+                                const statusText = tournament.locked ? 
+                                    "✅ Completed" : 
+                                    (teamCount > 0 ? `${teamCount}/${config.totalTeams} teams` : "Not started");
+                                
+                                return `
+                                    <div class="tournament-card ${tournament.locked ? 'locked' : ''}" 
+                                         data-action="selectTournament" data-type="${type}">
+                                        <h3>${config.emoji} ${config.name}</h3>
+                                        <p>${config.totalTeams} Teams • ${config.sessions} Sessions</p>
+                                        <small>${statusText}</small>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderBracketView() {
+                if (!this.state.currentTournament) return '';
+                const tournament = this.state.tournaments[this.state.currentTournament];
+                const config = tournamentConfigs[this.state.currentTournament];
+                
+                let content = '';
+                if (tournament.stage === 'setup') content = this.renderSetupStage(config);
+                else if (tournament.stage === 'sessions') content = this.renderSessionsStage(tournament, config);
+                else if (tournament.stage === 'final' || tournament.stage === 'finished') content = this.renderFinalStage(tournament);
+                
+                const progress = this.calculateProgress(tournament, config);
+
+                return `
+                    <div class="card">
+                        <div class="bracket-header">
+                            <h2>${config.emoji} ${config.name}</h2>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress.percent}%"></div>
+                                </div>
+                                <small><strong>${progress.text}</strong></small>
+                            </div>
+                        </div>
+                        ${content}
+                    </div>
+                `;
+            },
+            
+            renderSetupStage(config) {
+                let inputs = '';
+                for (let i = 1; i <= config.totalTeams; i++) {
+                    inputs += `<input type="text" class="team-input" placeholder="Team Name ${i}" required maxlength="30">`;
+                }
+                
+                return `
+                    <h3 class="card-header">Enter Team Names</h3>
+                    <div class="team-input-grid">${inputs}</div>
+                    <div style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-success" data-action="generateDummy">🔤 Generate Letter Teams</button>
+                        <button class="btn btn-primary" data-action="startBracket">🚀 Create Bracket</button>
+                    </div>
+                `;
+            },
+
+            renderSessionsStage(tournament, config) {
+                const currentSession = tournament.sessions.find(s => !s.completed);
+                const completedSessions = tournament.sessions.filter(s => s.completed);
+                
+                let content = '';
+                
+                // Show completed sessions (collapsed)
+                if (completedSessions.length > 0) {
+                    content += `<div style="margin-bottom: 30px;">`;
+                    completedSessions.forEach(session => {
+                        const winnerNames = session.winners.map(id => {
+                            const team = tournament.teams.find(t => t.id === id);
+                            return team ? team.name : 'Unknown';
+                        });
+                        
+                        content += `
+                            <div class="session" style="opacity: 0.7; margin-bottom: 15px;">
+                                <h4>✅ Session ${session.id} - Completed</h4>
+                                <p><strong>Winners:</strong> ${winnerNames.join(', ')}</p>
+                            </div>
+                        `;
+                    });
+                    content += `</div>`;
+                }
+                
+                // Show current session (expanded)
+                if (currentSession) {
+                    content += `
+                        <div class="session current-session">
+                            <h3>🎯 Current: Session ${currentSession.id} of ${config.sessions}</h3>
+                            <p class="final-instructions">
+                                Select <strong>${config.winnersPerSession} winners</strong> 
+                                (${currentSession.winners.length}/${config.winnersPerSession} winners chosen)
+                            </p>
+                            <div class="teams-grid">
+                                ${currentSession.teams.map(team => `
+                                    <div class="team-card ${currentSession.winners.includes(team.id) ? 'winner' : ''}" 
+                                         data-action="selectWinner" data-id="${team.id}">
+                                        <div>${team.name}</div>
+                                        ${currentSession.winners.includes(team.id) ? '<div style="margin-top: 8px;">✅ Winner</div>' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="text-align: center; margin-top: 25px;">
+                                <button class="btn btn-success" data-action="completeSession" 
+                                        ${currentSession.winners.length !== config.winnersPerSession ? 'disabled' : ''}>
+                                    ✅ Complete Session ${currentSession.id}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return content;
+            },
+
+            renderFinalStage(tournament) {
+                const allPositionsFilled = tournament.winners.first && tournament.winners.second && tournament.winners.third;
+                const availableTeams = tournament.finalists.filter(team => 
+                    !Object.values(tournament.winners).some(w => w?.id === team.id)
+                );
+                
+                let instructionText = "";
+                let currentStep = "";
+                
+                if (!tournament.winners.third) {
+                    instructionText = "🥉 Select <strong>THIRD PLACE</strong> first";
+                    currentStep = "Step 1 of 3";
+                } else if (!tournament.winners.second) {
+                    instructionText = `✅ Third Place: <strong>${tournament.winners.third.name}</strong><br>🥈 Now select the <strong>RUNNER-UP</strong> (2nd Place)`;
+                    currentStep = "Step 2 of 3";
+                } else if (!tournament.winners.first) {
+                    instructionText = `✅ Third Place: <strong>${tournament.winners.third.name}</strong><br>✅ Runner-up: <strong>${tournament.winners.second.name}</strong><br>🥇 Finally, select the <strong>CHAMPION</strong> (1st Place)`;
+                    currentStep = "Step 3 of 3";
+                } else {
+                    instructionText = "🎉 All positions assigned! Tournament ready for finalization.";
+                    currentStep = "Complete";
+                }
+
+                return `
+                    <div class="final-stage">
+                        <h2 style="text-align: center; margin-bottom: 10px;">🏆 GRAND FINAL 🏆</h2>
+                        ${tournament.stage !== 'finished' ? `
+                            <div style="text-align: center; margin-bottom: 20px; opacity: 0.9;">
+                                <small>${currentStep}</small>
+                            </div>
+                            <div class="final-instructions">${instructionText}</div>
+                        ` : ''}
+                        
+                        ${availableTeams.length > 0 && tournament.stage !== 'finished' ? `
+                            <div style="margin-bottom: 30px;">
+                                <h3 style="text-align: center; color: #FFF; margin-bottom: 20px;">
+                                    ${availableTeams.length === tournament.finalists.length ? 'Select from Finalists:' : 'Remaining Teams:'}
+                                </h3>
+                                <div class="teams-grid">
+                                    ${availableTeams.map(team => `
+                                        <div class="team-card" data-action="selectFinalWinner" data-id="${team.id}">
+                                            <div style="font-size: 1.1rem;">${team.name}</div>
+                                            <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">Click to select</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${Object.values(tournament.winners).some(w => w) || tournament.stage === 'finished' ? `
+                            <div style="margin: 30px 0;">
+                                <h3 style="text-align: center; color: #FFF; margin-bottom: 25px;">🏆 Final Results</h3>
+                                <div class="podium">
+                                    ${['second', 'first', 'third'].map(rank => {
+                                        const winner = tournament.winners[rank];
+                                        const medals = { first: '🥇', second: '🥈', third: '🥉' };
+                                        const positions = { first: 'CHAMPION', second: 'RUNNER-UP', third: 'THIRD PLACE' };
+                                        
+                                        return `
+                                            <div class="podium-place ${rank} ${winner ? 'filled' : ''}">
+                                                <div class="podium-medal">${medals[rank]}</div>
+                                                <strong>${positions[rank]}</strong>
+                                                <div style="margin-top: 12px; font-weight: 600; font-size: ${rank === 'first' ? '1.2rem' : '1rem'};">
+                                                    ${winner ? winner.name : '?'}
+                                                </div>
+                                                ${winner && rank === 'first' ? '<div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">🎉 Tournament Winner!</div>' : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${tournament.stage !== 'finished' ? `
+                            <div style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+                                <button class="btn btn-primary" data-action="finalize" ${!allPositionsFilled ? 'disabled' : ''}>
+                                    🏆 Finalize Tournament
+                                </button>
+                                <button class="btn btn-secondary" data-action="undoFinal" 
+                                        ${!Object.values(tournament.winners).some(w => w) ? 'disabled' : ''}>
+                                    ↩️ Undo Last Selection
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="completion-actions">
+                                <h3>🎊 TOURNAMENT COMPLETED! 🎊</h3>
+                                <p style="margin: 15px 0; font-size: 1.1rem;">Congratulations to all participants!</p>
+                                <div style="margin: 20px 0; padding: 15px; background: rgba(255,215,0,0.1); border-radius: 8px; border: 1px solid rgba(255,215,0,0.3);">
+                                    <strong style="color: #FFD700;">🏆 Champion: ${tournament.winners.first?.name}</strong>
+                                </div>
+                                <button class="btn btn-primary" data-action="returnToMenu">
+                                    🏠 Return to Main Menu
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                `;
+            },
+            
+            renderLeaderboardView() {
+                const stats = this.calculateStats();
+                const filteredResults = this.getFilteredLeaderboard();
+
+                if (this.state.leaderboard.length === 0) {
+                    return `
+                        <div class="card">
+                            <h2 class="card-header">🏆 Tournament Leaderboard</h2>
+                            <div style="text-align: center; padding: 40px; color: #666;">
+                                <div style="font-size: 3rem; margin-bottom: 20px;">🏆</div>
+                                <h3>No Completed Tournaments Yet</h3>
+                                <p>Complete a tournament to see results here!</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="card">
+                        <h2 class="card-header">🏆 Tournament Leaderboard & Statistics</h2>
+                        
+                        <!-- Statistics Dashboard -->
+                        <div class="stats-card">
+                            <h3 style="color: var(--primary-red); margin-bottom: 15px;">📊 Tournament Statistics</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">${stats.completedTournaments}</div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${stats.totalParticipants}</div>
+                                    <div class="stat-label">Total Participants</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${stats.activeTeams}</div>
+                                    <div class="stat-label">Active Teams</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${stats.mostWins ? stats.mostWins.wins : '0'}</div>
+                                    <div class="stat-label">Most Wins${stats.mostWins ? ` (${stats.mostWins.name})` : ''}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Controls -->
+                        <div class="filter-controls">
+                            <label for="leaderboardFilter" style="font-weight: 600;">Filter by Tournament:</label>
+                            <select id="leaderboardFilter" class="filter-select" value="${this.state.leaderboardFilter}">
+                                <option value="all">All Tournaments</option>
+                                ${Object.entries(tournamentConfigs).map(([type, config]) => 
+                                    `<option value="${type}">${config.emoji} ${config.name}</option>`
+                                ).join('')}
+                            </select>
+                            
+                            <label for="leaderboardSort" style="font-weight: 600;">Sort by:</label>
+                            <select id="leaderboardSort" class="filter-select" value="${this.state.leaderboardSort}">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="tournament">Tournament Type</option>
+                            </select>
+                        </div>
+
+                        <!-- Results -->
+                        ${this.renderFilteredResults(filteredResults)}
+                    </div>
+                `;
+            },
+
+            getFilteredLeaderboard() {
+                let filtered = [...this.state.leaderboard];
+
+                // Apply filter
+                if (this.state.leaderboardFilter !== 'all') {
+                    filtered = filtered.filter(result => result.tournament === this.state.leaderboardFilter);
+                }
+
+                // Apply sort
+                switch (this.state.leaderboardSort) {
+                    case 'date-asc':
+                        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        break;
+                    case 'date-desc':
+                        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        break;
+                    case 'tournament':
+                        filtered.sort((a, b) => a.tournamentName.localeCompare(b.tournamentName));
+                        break;
+                }
+
+                return filtered;
+            },
+
+            renderFilteredResults(results) {
+                if (results.length === 0) {
+                    return `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <div style="font-size: 2rem; margin-bottom: 15px;">🔍</div>
+                            <h3>No Results Found</h3>
+                            <p>Try adjusting your filters to see more results.</p>
+                        </div>
+                    `;
+                }
+
+                // Group by tournament if showing all
+                if (this.state.leaderboardFilter === 'all') {
+                    const grouped = results.reduce((acc, result) => {
+                        (acc[result.tournament] = acc[result.tournament] || []).push(result);
+                        return acc;
+                    }, {});
+
+                    return Object.entries(grouped).map(([type, tournamentResults]) => {
+                        const config = tournamentConfigs[type];
+                        return `
+                            <div class="leaderboard-card">
+                                <div class="leaderboard-header">
+                                    ${config.emoji} ${config.name} Results (${tournamentResults.length})
+                                </div>
+                                ${tournamentResults.map((result, index) => this.renderLeaderboardEntry(result, index === 0)).join('')}
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    const config = tournamentConfigs[this.state.leaderboardFilter];
+                    return `
+                        <div class="leaderboard-card">
+                            <div class="leaderboard-header">
+                                ${config.emoji} ${config.name} Results (${results.length})
+                            </div>
+                            ${results.map((result, index) => this.renderLeaderboardEntry(result, index === 0)).join('')}
+                        </div>
+                    `;
+                }
+            },
+
+            renderLeaderboardEntry(result, isLatest) {
+                return `
+                    <div class="leaderboard-entry">
+                        <div class="leaderboard-date">
+                            📅 ${new Date(result.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}
+                            ${isLatest ? '<span class="date-badge">Latest</span>' : ''}
+                        </div>
+                        <div class="leaderboard-winners">
+                            <div class="leaderboard-winner first">
+                                🥇 <strong>${result.champion.name}</strong>
+                            </div>
+                            <div class="leaderboard-winner second">
+                                🥈 ${result.runnerUp.name}
+                            </div>
+                            <div class="leaderboard-winner third">
+                                🥉 ${result.third.name}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            calculateProgress(tournament, config) {
+                if (tournament.stage === 'setup') return { percent: 5, text: "Setup Phase" };
+                if (tournament.stage === 'finished') return { percent: 100, text: "Completed" };
+                if (tournament.stage === 'final') return { percent: 90, text: "Grand Final" };
+                if (tournament.stage === 'sessions') {
+                    const completed = tournament.sessions.filter(s => s.completed).length;
+                    const percent = 10 + (completed / config.sessions) * 80;
+                    return { percent, text: `Session ${completed + 1}/${config.sessions}` };
+                }
+                return { percent: 0, text: "Not Started" };
+            },
+
+            // UI Helper Functions
+            showToast(message, type = "info") {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.className = `toast show ${type}`;
+                setTimeout(() => toast.classList.remove('show'), 4000);
+            },
+            
+            createConfetti(count = 50, colors = ['#DC2626', '#FFFFFF', '#FFD700']) {
+                const overlay = document.getElementById('celebrationOverlay');
+                for (let i = 0; i < count; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'confetti';
+                    el.style.left = `${Math.random() * 100}vw`;
+                    el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    el.style.animationDelay = `${Math.random() * 3}s`;
+                    el.style.animationDuration = `${3 + Math.random() * 2}s`;
+                    overlay.appendChild(el);
+                    setTimeout(() => el.remove(), 5000);
+                }
+            },
+            
+            openModal(content) {
+                document.getElementById('modalContent').innerHTML = content;
+                document.getElementById('modal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            },
+
+            closeModal() {
+                document.getElementById('modal').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            },
+
+            showConfirmModal(title, message, onConfirm, needsInput = false) {
+                const inputField = needsInput ? 
+                    `<input type="text" id="confirmationInput" placeholder="Type RESET here" 
+                     style="width: 100%; padding: 10px; margin: 15px 0; border: 2px solid #ddd; border-radius: 8px;">` : '';
+                     
+                const content = `
+                    <div class="modal-header">${title}</div>
+                    <div style="margin: 20px 0; line-height: 1.6;">
+                        ${message}
+                    </div>
+                    ${inputField}
+                    <div style="text-align: center; margin-top: 25px;">
+                        <button class="btn btn-primary" onclick="App.executeConfirmAction()"
+                                style="margin-right: 10px;">Confirm</button>
+                        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+                    </div>
+                `;
+                this.openModal(content);
+                this.pendingConfirmAction = onConfirm;
+            },
+
+            executeConfirmAction() {
+                if (this.pendingConfirmAction) {
+                    this.pendingConfirmAction();
+                    this.pendingConfirmAction = null;
+                }
+                this.closeModal();
+            },
+
+            showErrorModal(title, errors) {
+                const errorList = errors.map(error => `<li>${error}</li>`).join('');
+                const content = `
+                    <div class="modal-header">${title}</div>
+                    <div style="margin: 20px 0;">
+                        <ul style="margin-left: 20px; color: var(--error);">
+                            ${errorList}
+                        </ul>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-secondary close-modal-btn">Close</button>
+                    </div>
+                `;
+                this.openModal(content);
+            },
+
+            showCompletedResults(type) {
+                const results = this.state.leaderboard.filter(r => r.tournament === type);
+                if (results.length === 0) return;
+                
+                const latest = results[results.length - 1];
+                const config = tournamentConfigs[type];
+                
+                const content = `
+                    <div class="modal-header">${config.emoji} ${config.name} - Tournament Results</div>
+                    <div style="margin: 25px 0;">
+                        <div class="podium" style="margin: 30px 0;">
+                            <div class="podium-place second filled">
+                                <div class="podium-medal">🥈</div>
+                                <strong>Runner-up</strong>
+                                <div style="margin-top: 10px; font-weight: 600;">${latest.runnerUp.name}</div>
+                            </div>
+                            <div class="podium-place first filled">
+                                <div class="podium-medal">🥇</div>
+                                <strong>Champion</strong>
+                                <div style="margin-top: 10px; font-weight: 600;">${latest.champion.name}</div>
+                            </div>
+                            <div class="podium-place third filled">
+                                <div class="podium-medal">🥉</div>
+                                <strong>Third Place</strong>
+                                <div style="margin-top: 10px; font-weight: 600;">${latest.third.name}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: #666; margin-top: 20px;">
+                            <p><strong>Completed:</strong> ${new Date(latest.date).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}</p>
+                            <p><strong>Total Participants:</strong> ${latest.totalParticipants}</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn btn-secondary close-modal-btn">Close</button>
+                    </div>
+                `;
+                this.openModal(content);
+            }
+        };
+
+        // Initialize the application
+        App.init();
+    </script>
+</body>
+</html>
